@@ -1,0 +1,32 @@
+version: '3.5'
+
+volumes:
+  data-rabbitmq:
+
+services:
+  app:
+    env_file:
+      - .env
+    ports:
+      - '${DOCKER_HTTP_PORT}:8080'
+    image: golang:1.18.4-buster
+    working_dir: /app
+    command: go run cmd/main.go
+    volumes:
+      - ./src:/app
+    networks:
+      - default
+
+  rabbitmq:
+    build: docker/rabbitmq
+    volumes:
+      - data-rabbitmq:/var/lib/rabbitmq
+    ports:
+      - '${DOCKER_RABBITMQ_PORT}:5672'
+      - '${DOCKER_RABBITMQ_PANEL_PORT}:15672'
+    environment:
+      DOCKER_RABBITMQ_USER: ${DOCKER_RABBITMQ_USER}
+      DOCKER_RABBITMQ_PASSWORD: ${DOCKER_RABBITMQ_PASSWORD}
+      DOCKER_RABBITMQ_PID_FILE: ${DOCKER_RABBITMQ_PID_FILE}
+    networks:
+      - default
